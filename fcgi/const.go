@@ -4,20 +4,22 @@ const (
 	_FCGI_VERSION_1 byte = 1
 
 	//TODO record type
-	// management records
-	_FCGI_GET_VALUES        = 9  // web to app
-	_FCGI_GET_VALUES_RESULT = 10 // app to web
-	_FCGI_UNKNOWN_TYPE      = 11 // app to web
+	// at least one stream record in each direction
+	// empty stream record means the stream record finished
+	// 1. management records
+	_FCGI_GET_VALUES        = 9  // web to app(in)
+	_FCGI_GET_VALUES_RESULT = 10 // app to web(out)
+	_FCGI_UNKNOWN_TYPE      = 11 // app to web(out)
 	// application records
-	_FCGI_BEGIN_REQUEST = 1 // web to app
-	_FCGI_PARAMS        = 4 //stream record, web to app
-	_FCGI_STDIN         = 5 //stream record, web to app
-	_FCGI_DATA          = 8 //stream record, web to app
-	_FCGI_STDOUT        = 6 //stream record, app to web
-	_FCGI_STDERR        = 7 //stream record, app to web
-	_FCGI_ABORT_REQUEST = 2 // web to app
-	_FCGI_END_REQUEST   = 3 // app to web
-	// other
+	_FCGI_BEGIN_REQUEST = 1 // web to app(in)
+	_FCGI_ABORT_REQUEST = 2 // web to app(in)
+	_FCGI_PARAMS        = 4 //stream record, web to app(in)
+	_FCGI_STDIN         = 5 //stream record, web to app(in)
+	_FCGI_DATA          = 8 //stream record, web to app(in)
+	_FCGI_STDOUT        = 6 //stream record, app to web(out)
+	_FCGI_STDERR        = 7 //stream record, app to web(out)
+	_FCGI_END_REQUEST   = 3 // app to web(out)
+	// 2. other
 	_FCGI_MAXTYPE = _FCGI_UNKNOWN_TYPE
 
 	// protocol status
