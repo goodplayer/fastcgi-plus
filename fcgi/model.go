@@ -51,7 +51,7 @@ func (this *requestHeader) read(r io.Reader) (bool, error) {
 		Len:  8,
 		Cap:  8,
 	}
-	n, err := io.ReadFull(r, []byte(*(*[]byte)(unsafe.Pointer(&h))))
+	n, err := io.ReadFull(r, *(*[]byte)(unsafe.Pointer(&h)))
 	if n == 0 && err == io.EOF {
 		return true, nil
 	}
