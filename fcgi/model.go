@@ -1,6 +1,8 @@
 package fcgi
 
 import (
+	"io"
+	"reflect"
 	"unsafe"
 )
 
@@ -41,6 +43,19 @@ func (this *requestHeader) setContentLength(length uint16) {
 
 func (this *requestHeader) getContentLength() uint16 {
 	return uint16(this.ContentLengthMSB<<8) | uint16(this.ContentLengthLSB)
+}
+
+func (this *requestHeader) read(r io.Reader) (bool, error) {
+	h := &reflect.SliceHeader{
+		Data: uintptr(unsafe.Pointer(this)),
+		Len:  8,
+		Cap:  8,
+	}
+	n, err := io.ReadFull(r, []byte(*(*[]byte)(unsafe.Pointer(h))))
+	if n == 0 && err == io.EOF {
+		return true, nil
+	}
+	return false, err
 }
 
 type nameValuePair11 struct {
