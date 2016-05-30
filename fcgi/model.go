@@ -7,7 +7,7 @@ import (
 )
 
 type request struct {
-	Header      *requestHeader
+	Header      requestHeader
 	ContentData []byte
 	PaddingData []byte
 }
