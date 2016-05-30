@@ -37,14 +37,13 @@ func (this *child) childHandleProcessor() {
 	defer this.reset()
 	defer this.release()
 	for {
-		header := getRequestHeader()
+		header := requestHeader{}
 		close, err := header.read(r)
 		if close {
 			break
 		}
 		if err != nil {
 			logError("read header error.", err)
-			returnRequestHeader(header)
 			break
 		}
 		req := request{

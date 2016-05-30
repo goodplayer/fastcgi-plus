@@ -14,12 +14,6 @@ var (
 			return new(child)
 		},
 	}
-
-	requestHeaderCache = sync.Pool{
-		New: func() interface{} {
-			return new(requestHeader)
-		},
-	}
 )
 
 func getBuffer() []byte {
@@ -39,15 +33,4 @@ func getChild() *child {
 func returnChild(c *child) {
 	c.reset()
 	childCache.Put(c)
-}
-
-func getRequestHeader() *requestHeader {
-	h := requestHeaderCache.Get().(*requestHeader)
-	h.reset()
-	return h
-}
-
-func returnRequestHeader(h *requestHeader) {
-	h.reset()
-	requestHeaderCache.Put(h)
 }
