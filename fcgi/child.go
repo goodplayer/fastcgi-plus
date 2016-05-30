@@ -63,5 +63,8 @@ func (this *child) outboundProcessor() {
 
 func packetDispatching(req request) error {
 	//TODO
+	if req.Header.getRequestId() == 0 {
+
+	}
 	return nil
 }

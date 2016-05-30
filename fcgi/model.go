@@ -23,31 +23,31 @@ type requestHeader struct {
 	Reserved         byte
 }
 
-func (this requestHeader) reset() {
+func (this *requestHeader) reset() {
 	*(*int64)(unsafe.Pointer(this)) = 0
 }
 
-func (this requestHeader) setRequestId(id uint16) {
+func (this *requestHeader) setRequestId(id uint16) {
 	this.RequestIdLSB = byte(id)
 	this.RequestIdMSB = byte(id >> 8)
 }
 
-func (this requestHeader) getRequestId() uint16 {
-	return uint16(this.RequestIdMSB<<8) | uint16(this.RequestIdLSB)
+func (this *requestHeader) getRequestId() uint16 {
+	return uint16(uint16(this.RequestIdMSB)<<8) | uint16(this.RequestIdLSB)
 }
 
-func (this requestHeader) setContentLength(length uint16) {
+func (this *requestHeader) setContentLength(length uint16) {
 	this.ContentLengthLSB = byte(length)
 	this.ContentLengthMSB = byte(length >> 8)
 }
 
-func (this requestHeader) getContentLength() uint16 {
-	return uint16(this.ContentLengthMSB<<8) | uint16(this.ContentLengthLSB)
+func (this *requestHeader) getContentLength() uint16 {
+	return uint16(uint16(this.ContentLengthMSB)<<8) | uint16(this.ContentLengthLSB)
 }
 
-func (this requestHeader) read(r io.Reader) (bool, error) {
+func (this *requestHeader) read(r io.Reader) (bool, error) {
 	h := reflect.SliceHeader{
-		Data: uintptr(unsafe.Pointer(&this)),
+		Data: uintptr(unsafe.Pointer(this)),
 		Len:  8,
 		Cap:  8,
 	}
