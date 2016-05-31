@@ -49,11 +49,14 @@ func (this *child) childHandleProcessor() {
 		req := request{
 			Header: header,
 		}
-		err = this.packetDispatching(req)
-		if err != nil {
-			logError("packet dispatching error. exit inbound loop.", err)
+		bizErr, ioErr := this.packetDispatching(req)
+		if bizErr != nil {
+			logError("packet dispatching occurs biz error. exit inbound loop.", err)
 			this.release()
 			readToEOF(r)
+			break
+		} else if ioErr != nil {
+			logError("packet dispatching occurs io error. exit inbound loop.", err)
 			break
 		}
 	}
@@ -63,7 +66,7 @@ func (this *child) outboundProcessor() {
 	//TODO
 }
 
-func (this *child) packetDispatching(req request) error {
+func (this *child) packetDispatching(req request) (error, error) {
 	//TODO
 	if req.Header.getRequestId() == 0 {
 		t := req.Header.Type
@@ -73,5 +76,5 @@ func (this *child) packetDispatching(req request) error {
 		}
 		//TODO we don't support managing request now, send unknow type packet
 	}
-	return nil
+	return nil, nil
 }
