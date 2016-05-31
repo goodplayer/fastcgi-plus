@@ -45,5 +45,18 @@ const (
 )
 
 const (
-	default_buffer_size = 4096
+	default_buffer_size = 64 * 1024
+)
+
+var (
+	unknown_type_packet unknownTypeMessage = [16]byte{
+		_FCGI_VERSION_1,
+		_FCGI_UNKNOWN_TYPE,
+		0, 0,
+		0, 8,
+		0, 0,
+
+		0, // type - predefine = 0, must change
+		0, 0, 0, 0, 0, 0, 0,
+	}
 )

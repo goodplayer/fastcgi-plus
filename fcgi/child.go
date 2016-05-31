@@ -49,9 +49,11 @@ func (this *child) childHandleProcessor() {
 		req := request{
 			Header: header,
 		}
-		err = packetDispatching(req)
+		err = this.packetDispatching(req)
 		if err != nil {
 			logError("packet dispatching error. exit inbound loop.", err)
+			this.release()
+			readToEOF(r)
 			break
 		}
 	}
@@ -61,10 +63,15 @@ func (this *child) outboundProcessor() {
 	//TODO
 }
 
-func packetDispatching(req request) error {
+func (this *child) packetDispatching(req request) error {
 	//TODO
 	if req.Header.getRequestId() == 0 {
-
+		t := req.Header.Type
+		ok := checkIsManagingRequest(t)
+		if !ok {
+			logError("requestId 0 with non-managing request")
+		}
+		//TODO we don't support managing request now, send unknow type packet
 	}
 	return nil
 }

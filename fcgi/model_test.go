@@ -12,3 +12,11 @@ func TestRequestHeaderGetterSetter(t *testing.T) {
 		t.Fatal("request header is not 12345. actual:", rh.getRequestId())
 	}
 }
+
+func TestUnknownTypeMessage(t *testing.T) {
+	ty := unknown_type_packet
+	t.Log(ty.toBytes())
+	ty.setType(1)
+	t.Log(ty.toBytes())
+	t.Log(unknown_type_packet.toBytes())
+}

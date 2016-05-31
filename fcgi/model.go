@@ -118,3 +118,13 @@ type endRequestBody struct {
 	ProtocolStatus byte
 	Reserved       [3]byte
 }
+
+type unknownTypeMessage [16]byte
+
+func (this *unknownTypeMessage) setType(t byte) {
+	this[8] = t
+}
+
+func (this *unknownTypeMessage) toBytes() []byte {
+	return (*this)[:]
+}
