@@ -11,6 +11,7 @@ type child struct {
 	conn       net.Conn
 	recordChan chan reqWriter
 	r          *bufio.Reader
+	requests   map[uint16]*statefulRequest
 }
 
 func startChildHandleLoop(conn net.Conn, handler http.Handler, fcgis *fcgiServer) error {
@@ -37,6 +38,7 @@ func (this *child) reset() {
 func (this *child) childHandleProcessor() {
 	r := this.r
 	loop := true
+	requests := this.requests
 	defer this.reset()
 	defer this.release()
 	for loop {
@@ -70,7 +72,7 @@ func (this *child) childHandleProcessor() {
 			}
 			req.ContentData = b[:cl]
 		}
-		bizErr := this.packetDispatching(req)
+		bizErr := this.packetDispatching(req, requests)
 		bi.Release() // user should use retain/release for custom reason
 		if bizErr != nil {
 			logError("packet dispatching occurs biz error. exit inbound loop.", err)
