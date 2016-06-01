@@ -8,7 +8,7 @@ import (
 
 type child struct {
 	conn       net.Conn
-	recordChan chan *request
+	recordChan chan reqWriter
 	r          *bufio.Reader
 }
 
@@ -16,6 +16,7 @@ func startChildHandleLoop(conn net.Conn, handler http.Handler, fcgis *fcgiServer
 	c := getChild()
 	c.conn = conn
 	c.r = bufio.NewReader(conn)
+	c.recordChan = make(chan reqWriter, 64)
 
 	go c.childHandleProcessor()
 	go c.outboundProcessor()
@@ -53,7 +54,7 @@ func (this *child) childHandleProcessor() {
 		if bizErr != nil {
 			logError("packet dispatching occurs biz error. exit inbound loop.", err)
 			this.release()
-			readToEOF(r)
+			//readToEOF(r) // perhaps we don't need read to EOF
 			break
 		} else if ioErr != nil {
 			logError("packet dispatching occurs io error. exit inbound loop.", err)
@@ -74,7 +75,10 @@ func (this *child) packetDispatching(req request) (error, error) {
 		if !ok {
 			logError("requestId 0 with non-managing request")
 		}
-		//TODO we don't support managing request now, send unknow type packet
+		// we don't support managing request now, send unknow type packet
+		un := unknownTypeMessage{}
+		un.setType(req.Header.Type)
+		this.recordChan <- un
 	}
 	return nil, nil
 }

@@ -6,6 +6,10 @@ import (
 	"unsafe"
 )
 
+type reqWriter interface {
+	write(io.Writer) (int, error)
+}
+
 type request struct {
 	Header      requestHeader
 	ContentData []byte
@@ -127,4 +131,8 @@ func (this *unknownTypeMessage) setType(t byte) {
 
 func (this *unknownTypeMessage) toBytes() []byte {
 	return (*this)[:]
+}
+
+func (this unknownTypeMessage) write(w io.Writer) (int, error) {
+	return w.Write(this[:])
 }
