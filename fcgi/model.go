@@ -102,11 +102,6 @@ type nameValuePair44 struct {
 	ValueData     []byte
 }
 
-type unknownTypeBody struct {
-	Type     byte
-	Reserved [7]byte
-}
-
 type beginRequestBody struct {
 	RoleMSB  byte
 	RoleLSB  byte
@@ -135,4 +130,8 @@ func (this *unknownTypeMessage) toBytes() []byte {
 
 func (this unknownTypeMessage) write(w io.Writer) (int, error) {
 	return w.Write(this[:])
+}
+
+type statefulRequest struct {
+	//TODO
 }
