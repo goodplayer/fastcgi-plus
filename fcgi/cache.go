@@ -1,27 +1,55 @@
 package fcgi
 
-import "sync"
+import (
+	"sync"
+	"sync/atomic"
+)
 
 var (
-	bufCache = sync.Pool{
-		New: func() interface{} {
-			return make([]byte, default_buffer_size)
-		},
-	}
-
 	childCache = sync.Pool{
 		New: func() interface{} {
 			return new(child)
 		},
 	}
+
+	bufItemCache = sync.Pool{
+		New: func() interface{} {
+			return &BufItem{}
+		},
+	}
 )
 
-func getBuffer() []byte {
-	return bufCache.Get().([]byte)
+type BufItem struct {
+	data        [default_buffer_size]byte
+	ref         int32
+	releaseFunc func(*BufItem)
 }
 
-func returnBuffer(b []byte) {
-	bufCache.Put(b)
+func getBufItem() *BufItem {
+	b := bufItemCache.Get().(*BufItem)
+	b.releaseFunc = returnBufItem
+	return b
+}
+
+func returnBufItem(buf *BufItem) {
+	bufItemCache.Put(buf)
+}
+
+func (this *BufItem) GetBuffer() []byte {
+	return this.data[:]
+}
+
+func (this *BufItem) Retain() {
+	atomic.AddInt32(&this.ref, 1)
+}
+
+func (this *BufItem) Release() {
+	i := atomic.AddInt32(&this.ref, -1)
+	if i == 0 {
+		this.releaseFunc(this)
+	} else if i < 0 {
+		panic("BufItem ref < 0")
+	}
 }
 
 func getChild() *child {

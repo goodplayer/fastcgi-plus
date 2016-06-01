@@ -2,6 +2,7 @@ package fcgi
 
 import (
 	"bufio"
+	"io"
 	"net"
 	"net/http"
 )
@@ -35,9 +36,10 @@ func (this *child) reset() {
 
 func (this *child) childHandleProcessor() {
 	r := this.r
+	loop := true
 	defer this.reset()
 	defer this.release()
-	for {
+	for loop {
 		header := requestHeader{}
 		close, err := header.read(r)
 		if close {
@@ -50,14 +52,29 @@ func (this *child) childHandleProcessor() {
 		req := request{
 			Header: header,
 		}
-		bizErr, ioErr := this.packetDispatching(req)
+		cl := int(header.getContentLength()) & 0xFFFF
+		var bi *BufItem
+		if header.getContentLength() > 0 {
+			bi = getBufItem()
+			bi.Retain()
+			b := bi.GetBuffer()[:cl]
+			n, err := io.ReadFull(r, b[:cl])
+			if err != nil {
+				if n < cl {
+					logError("packet dispatching occurs io error. exit inbound loop.", err)
+					bi.Release()
+					break
+				} else {
+					loop = false // exit loop, but process last request
+				}
+			}
+			req.ContentData = b[:cl]
+		}
+		bizErr := this.packetDispatching(req)
+		bi.Release() // user should use retain/release for custom reason
 		if bizErr != nil {
 			logError("packet dispatching occurs biz error. exit inbound loop.", err)
-			this.release()
 			//readToEOF(r) // perhaps we don't need read to EOF
-			break
-		} else if ioErr != nil {
-			logError("packet dispatching occurs io error. exit inbound loop.", err)
 			break
 		}
 	}
@@ -67,7 +84,7 @@ func (this *child) outboundProcessor() {
 	//TODO
 }
 
-func (this *child) packetDispatching(req request) (error, error) {
+func (this *child) packetDispatching(req request) error {
 	//TODO
 	if req.Header.getRequestId() == 0 {
 		t := req.Header.Type
@@ -79,6 +96,8 @@ func (this *child) packetDispatching(req request) (error, error) {
 		un := unknownTypeMessage{}
 		un.setType(req.Header.Type)
 		this.recordChan <- un
+	} else {
+
 	}
-	return nil, nil
+	return nil
 }
