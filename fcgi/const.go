@@ -49,7 +49,7 @@ const (
 )
 
 var (
-	unknown_type_packet unknownTypeMessage = [16]byte{
+	unknown_type_packet _unknownTypeMessage = [16]byte{
 		_FCGI_VERSION_1,
 		_FCGI_UNKNOWN_TYPE,
 		0, 0,
@@ -58,5 +58,14 @@ var (
 
 		0, // type - predefine = 0, must change
 		0, 0, 0, 0, 0, 0, 0,
+	}
+
+	end_request_message _endRequestMessage = [16]byte{
+		_FCGI_VERSION_1, _FCGI_END_REQUEST,
+		0, 0, 0, 8, 0, 0,
+
+		0, 0, 0, 0, // app status
+		0, // protocol status
+		0, 0, 0,
 	}
 )

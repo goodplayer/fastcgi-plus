@@ -17,6 +17,12 @@ var (
 			return &BufItem{}
 		},
 	}
+
+	statefulRequestCache = sync.Pool{
+		New: func() interface{} {
+			return new(statefulRequest)
+		},
+	}
 )
 
 type BufItem struct {
@@ -65,4 +71,15 @@ func getChild() *child {
 func returnChild(c *child) {
 	c.reset()
 	childCache.Put(c)
+}
+
+func getStatefulRequest() *statefulRequest {
+	r := statefulRequestCache.Get().(*statefulRequest)
+	r.reset()
+	return r
+}
+
+func returnStatefulRequest(request *statefulRequest) {
+	request.reset()
+	statefulRequestCache.Put(request)
 }

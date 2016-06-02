@@ -118,20 +118,55 @@ type endRequestBody struct {
 	Reserved       [3]byte
 }
 
-type unknownTypeMessage [16]byte
+type _unknownTypeMessage [16]byte
 
-func (this *unknownTypeMessage) setType(t byte) {
+func (this *_unknownTypeMessage) setType(t byte) {
 	this[8] = t
 }
 
-func (this *unknownTypeMessage) toBytes() []byte {
+func (this *_unknownTypeMessage) toBytes() []byte {
 	return (*this)[:]
 }
 
-func (this unknownTypeMessage) write(w io.Writer) (int, error) {
+func (this _unknownTypeMessage) write(w io.Writer) (int, error) {
 	return w.Write(this[:])
 }
 
+type _endRequestMessage [16]byte
+
+func (this *_endRequestMessage) setRequestId(reqId uint16) {
+	(*this)[2] = byte(reqId >> 8)
+	(*this)[3] = byte(reqId)
+}
+
+func (this *_endRequestMessage) setAppStatus(appStatus int32) {
+	(*this)[8] = byte(appStatus >> 24)
+	(*this)[9] = byte(appStatus >> 16)
+	(*this)[10] = byte(appStatus >> 8)
+	(*this)[11] = byte(appStatus)
+}
+
+func (this *_endRequestMessage) setProtocolStatus(protocolStatus byte) {
+	(*this)[12] = byte(protocolStatus)
+}
+
+func (this _endRequestMessage) write(w io.Writer) (int, error) {
+	return w.Write(this[:])
+}
+
+const (
+	_STATEFUL_REQUEST_STATE_READING_PARAM = 1
+	_STATEFUL_REQUEST_STATE_READING_STDIN = 2
+	_STATEFUL_REQUEST_STATE_READING_DATA  = 3
+	_STATEFUL_REQUEST_STATE_READING_DONE  = 4
+)
+
 type statefulRequest struct {
+	//TODO
+	reqId uint16
+	state byte
+}
+
+func (this *statefulRequest) reset() {
 	//TODO
 }
