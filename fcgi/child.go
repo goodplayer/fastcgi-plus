@@ -58,7 +58,6 @@ func (this *child) childHandleProcessor() {
 		var bi *BufItem
 		if header.getContentLength() > 0 {
 			bi = getBufItem()
-			bi.Retain()
 			b := bi.GetBuffer()[:cl]
 			n, err := io.ReadFull(r, b[:cl])
 			if err != nil {

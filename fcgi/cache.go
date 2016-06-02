@@ -28,6 +28,7 @@ type BufItem struct {
 func getBufItem() *BufItem {
 	b := bufItemCache.Get().(*BufItem)
 	b.releaseFunc = returnBufItem
+	b.ref = 1
 	return b
 }
 
@@ -40,6 +41,9 @@ func (this *BufItem) GetBuffer() []byte {
 }
 
 func (this *BufItem) Retain() {
+	if atomic.LoadInt32(&this.ref) <= 0 {
+		panic("BufItem is released. should not retain!")
+	}
 	atomic.AddInt32(&this.ref, 1)
 }
 
