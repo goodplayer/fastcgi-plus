@@ -151,6 +151,9 @@ func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulReq
 				end.setProtocolStatus(_FCGI_UNKNOWN_ROLE)
 				end.setRequestId(reqId)
 				this.recordChan <- end
+				this.requestLock.Lock()
+				delete(reqMap, reqId)
+				this.requestLock.Unlock()
 				return nil
 			} else {
 				// others may be error state
@@ -159,6 +162,9 @@ func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulReq
 				end.setProtocolStatus(_FCGI_UNKNOWN_ROLE)
 				end.setRequestId(reqId)
 				this.recordChan <- end
+				this.requestLock.Lock()
+				delete(reqMap, reqId)
+				this.requestLock.Unlock()
 				return nil
 			}
 		}
