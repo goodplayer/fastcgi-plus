@@ -145,9 +145,21 @@ func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulReq
 			} else if r.state == _STATEFUL_REQUEST_STATE_READING_STDIN {
 				//TODO
 			} else if r.state == _STATEFUL_REQUEST_STATE_READING_DATA {
-				//TODO currently not support reading data
+				// currently not support reading data
+				end := end_request_message
+				end.setAppStatus(3)
+				end.setProtocolStatus(_FCGI_UNKNOWN_ROLE)
+				end.setRequestId(reqId)
+				this.recordChan <- end
+				return nil
 			} else {
-				//TODO others may be error state
+				// others may be error state
+				end := end_request_message
+				end.setAppStatus(2)
+				end.setProtocolStatus(_FCGI_UNKNOWN_ROLE)
+				end.setRequestId(reqId)
+				this.recordChan <- end
+				return nil
 			}
 		}
 	}
