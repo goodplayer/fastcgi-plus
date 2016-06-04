@@ -163,10 +163,32 @@ const (
 
 type statefulRequest struct {
 	//TODO
-	reqId uint16
-	state byte
+	reqId         uint16
+	state         byte
+	definedParams struct {
+		SCRIPT_FILENAME   []byte
+		QUERY_STRING      []byte
+		REQUEST_METHOD    []byte
+		CONTENT_TYPE      []byte
+		CONTENT_LENGTH    []byte
+		SCRIPT_NAME       []byte
+		REQUEST_URI       []byte
+		DOCUMENT_URI      []byte
+		DOCUMENT_ROOT     []byte
+		SERVER_PROTOCOL   []byte
+		REQUEST_SCHEME    []byte
+		HTTPS             []byte
+		GATEWAY_INTERFACE []byte
+		SERVER_SOFTWARE   []byte
+		REMOTE_ADDR       []byte
+		REMOTE_PORT       []byte
+		SERVER_ADDR       []byte
+		SERVER_PORT       []byte
+		SERVER_NAME       []byte
+	}
+	params [][]byte
 }
 
 func (this *statefulRequest) reset() {
-	//TODO
+	*((*[unsafe.Sizeof(*this)]byte)(unsafe.Pointer(this))) = [unsafe.Sizeof(*this)]byte{}
 }
