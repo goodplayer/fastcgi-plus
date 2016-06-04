@@ -141,9 +141,19 @@ func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulReq
 		} else {
 			// request id exists.
 			if r.state == _STATEFUL_REQUEST_STATE_READING_PARAM {
-				//TODO reading param
+				// reading param
+				if len(req.ContentData) == 0 {
+					r.state = _STATEFUL_REQUEST_STATE_READING_STDIN
+				} else {
+					//TODO
+				}
 			} else if r.state == _STATEFUL_REQUEST_STATE_READING_STDIN {
-				//TODO
+				// reading stdin
+				if len(req.ContentData) == 0 {
+					r.state = _STATEFUL_REQUEST_STATE_READING_DONE
+				} else {
+					//TODO
+				}
 			} else if r.state == _STATEFUL_REQUEST_STATE_READING_DATA {
 				// currently not support reading data
 				end := end_request_message

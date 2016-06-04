@@ -1,1 +1,4 @@
 1. close method for child
+
+inbound inherited:
+requestId -> role -> FCGI_PARAMS -> FCGI_DATA -> FCGI_DATA -> fire

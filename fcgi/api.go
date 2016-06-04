@@ -3,10 +3,13 @@ package fcgi
 import (
 	"net"
 	"net/http"
+
+	fcgihttp "github.com/goodplayer/fastcgi-plus/fcgi/http"
 )
 
 type fcgiServer struct {
-	option *FcgiServerOption
+	option         *FcgiServerOption
+	childProcessor childProcessor
 }
 
 type FcgiServerOption struct {
@@ -19,6 +22,7 @@ func NewFcgiServer(option *FcgiServerOption) *fcgiServer {
 }
 
 func (this *fcgiServer) Serve(l net.Listener, handler http.Handler) error {
+	this.childProcessor = fcgihttp.NewHttpProcessor()
 	for {
 		conn, err := l.Accept()
 		if err != nil {
