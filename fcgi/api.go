@@ -5,11 +5,12 @@ import (
 	"net/http"
 
 	fcgihttp "github.com/goodplayer/fastcgi-plus/fcgi/http"
+	"github.com/goodplayer/fastcgi-plus/fcgi/innerapi"
 )
 
 type fcgiServer struct {
 	option         *FcgiServerOption
-	childProcessor childProcessor
+	childProcessor innerapi.ChildProcessor
 }
 
 type FcgiServerOption struct {

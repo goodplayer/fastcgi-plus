@@ -6,6 +6,8 @@ import (
 	"net"
 	"net/http"
 	"sync"
+
+	"github.com/goodplayer/fastcgi-plus/fcgi/innerapi"
 )
 
 type child struct {
@@ -31,7 +33,7 @@ func startChildHandleLoop(conn net.Conn, handler http.Handler, fcgis *fcgiServer
 	c.recordChan = make(chan reqWriter, 64)
 	c.requests = make(map[uint16]*statefulRequest)
 
-	go c.childHandleProcessor()
+	go c.childHandleProcessor(fcgis.childProcessor)
 	go c.outboundProcessor()
 
 	//TODO
@@ -42,7 +44,7 @@ func (this *child) release() {
 	this.conn.Close()
 }
 
-func (this *child) childHandleProcessor() {
+func (this *child) childHandleProcessor(cp innerapi.ChildProcessor) {
 	r := this.r
 	loop := true
 	requests := this.requests
@@ -78,7 +80,7 @@ func (this *child) childHandleProcessor() {
 			}
 			req.ContentData = b[:cl]
 		}
-		bizErr := this.packetDispatching(req, requests)
+		bizErr := this.packetDispatching(req, requests, cp)
 		bi.Release() // user should use retain/release for custom reason
 		if bizErr != nil {
 			logError("packet dispatching occurs biz error. exit inbound loop.", err)
@@ -92,7 +94,7 @@ func (this *child) outboundProcessor() {
 	//TODO
 }
 
-func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulRequest) error {
+func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulRequest, cp innerapi.ChildProcessor) error {
 	reqId := req.Header.getRequestId()
 	ptype := req.Header.Type
 	if reqId == 0 {
@@ -146,6 +148,7 @@ func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulReq
 					r.state = _STATEFUL_REQUEST_STATE_READING_STDIN
 				} else {
 					//TODO
+					pairs := parseNvPair(req.ContentData)
 				}
 			} else if r.state == _STATEFUL_REQUEST_STATE_READING_STDIN {
 				// reading stdin

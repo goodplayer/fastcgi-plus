@@ -1,6 +1,7 @@
 package fcgi
 
 import (
+	"bytes"
 	"io"
 	"reflect"
 	"unsafe"
@@ -69,6 +70,10 @@ type nameValuePair11 struct {
 	ValueData   []byte
 }
 
+func (this nameValuePair11) GetKeyValue() ([]byte, []byte) {
+	return this.NameData, this.ValueData
+}
+
 type nameValuePair14 struct {
 	NameLength    int8
 	ValueLengthB3 int8
@@ -79,6 +84,10 @@ type nameValuePair14 struct {
 	ValueData     []byte
 }
 
+func (this nameValuePair14) GetKeyValue() ([]byte, []byte) {
+	return this.NameData, this.ValueData
+}
+
 type nameValuePair41 struct {
 	NameLengthB3 int8
 	NameLengthB2 byte
@@ -87,6 +96,10 @@ type nameValuePair41 struct {
 	ValueLength  int8
 	NameData     []byte
 	ValueData    []byte
+}
+
+func (this nameValuePair41) GetKeyValue() ([]byte, []byte) {
+	return this.NameData, this.ValueData
 }
 
 type nameValuePair44 struct {
@@ -100,6 +113,20 @@ type nameValuePair44 struct {
 	ValueLengthB0 byte
 	NameData      []byte
 	ValueData     []byte
+}
+
+func (this nameValuePair44) GetKeyValue() ([]byte, []byte) {
+	return this.NameData, this.ValueData
+}
+
+type nvPair interface {
+	GetKeyValue() ([]byte, []byte)
+}
+
+func parseNvPair(data []byte) []nvPair {
+	// now we may regard data as complete set of nvPairs leaving rest data in another 'data'
+	buf := bytes.NewBuffer(data)
+	//TODO
 }
 
 type beginRequestBody struct {
@@ -186,9 +213,13 @@ type statefulRequest struct {
 		SERVER_PORT       []byte
 		SERVER_NAME       []byte
 	}
-	params [][]byte
+	params map[string][]byte
 }
 
 func (this *statefulRequest) reset() {
 	*((*[unsafe.Sizeof(*this)]byte)(unsafe.Pointer(this))) = [unsafe.Sizeof(*this)]byte{}
+}
+
+func (this *statefulRequest) Set(key, value []byte) {
+	//TODO
 }
