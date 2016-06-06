@@ -142,22 +142,34 @@ func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulReq
 			}
 		} else {
 			// request id exists.
-			if r.state == _STATEFUL_REQUEST_STATE_READING_PARAM {
+			switch r.state {
+			case _STATEFUL_REQUEST_STATE_READING_PARAM:
 				// reading param
 				if len(req.ContentData) == 0 {
 					r.state = _STATEFUL_REQUEST_STATE_READING_STDIN
 				} else {
 					//TODO
-					pairs := parseNvPair(req.ContentData)
+					pairs, err := parseNvPair(req.ContentData)
+					if err != nil {
+						end := end_request_message
+						end.setAppStatus(4)
+						end.setProtocolStatus(_FCGI_UNKNOWN_ROLE)
+						end.setRequestId(reqId)
+						this.recordChan <- end
+						this.requestLock.Lock()
+						delete(reqMap, reqId)
+						this.requestLock.Unlock()
+						return nil
+					}
 				}
-			} else if r.state == _STATEFUL_REQUEST_STATE_READING_STDIN {
+			case _STATEFUL_REQUEST_STATE_READING_STDIN:
 				// reading stdin
 				if len(req.ContentData) == 0 {
 					r.state = _STATEFUL_REQUEST_STATE_READING_DONE
 				} else {
 					//TODO
 				}
-			} else if r.state == _STATEFUL_REQUEST_STATE_READING_DATA {
+			case _STATEFUL_REQUEST_STATE_READING_DATA:
 				// currently not support reading data
 				end := end_request_message
 				end.setAppStatus(3)
@@ -168,7 +180,7 @@ func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulReq
 				delete(reqMap, reqId)
 				this.requestLock.Unlock()
 				return nil
-			} else {
+			default:
 				// others may be error state
 				end := end_request_message
 				end.setAppStatus(2)
