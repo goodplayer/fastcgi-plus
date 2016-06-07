@@ -2,3 +2,6 @@
 
 inbound inherited:
 requestId -> role -> FCGI_PARAMS -> FCGI_DATA -> FCGI_DATA -> fire
+
+stdio
+output
