@@ -236,6 +236,7 @@ type statefulRequest struct {
 	//TODO
 	reqId         uint16
 	state         byte
+	obj           interface{}
 	definedParams struct {
 		SCRIPT_FILENAME   []byte
 		QUERY_STRING      []byte
@@ -290,6 +291,25 @@ func (this *statefulRequest) Get(key []byte) []byte {
 	} else {
 		return this.params[keyString]
 	}
+}
+
+func (this *statefulRequest) GetString(key string) string {
+	kh := ((*reflect.StringHeader)(unsafe.Pointer(&key)))
+	keyByte := *(*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
+		Data: kh.Data,
+		Len:  kh.Len,
+		Cap:  kh.Len,
+	}))
+	v := this.Get(keyByte)
+	vh := ((*reflect.SliceHeader)(unsafe.Pointer(&v)))
+	return *(*string)(unsafe.Pointer(&reflect.StringHeader{
+		Data: vh.Data,
+		Len:  vh.Len,
+	}))
+}
+
+func (this *statefulRequest) GetNonFcgiParam() map[string][]byte {
+	return this.params
 }
 
 var (

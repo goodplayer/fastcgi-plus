@@ -1,7 +1,7 @@
 package innerapi
 
 type ChildProcessor interface {
-	ProcessParam(ParamContainer)
+	ProcessParam(ParamContainer) (interface{}, error)
 }
 
 type NvPair interface {
@@ -12,4 +12,6 @@ type NvPair interface {
 type ParamContainer interface {
 	Set([]byte, []byte)
 	Get([]byte) []byte
+	GetString(string) string
+	GetNonFcgiParam() map[string][]byte
 }

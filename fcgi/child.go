@@ -146,7 +146,19 @@ func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulReq
 			case _STATEFUL_REQUEST_STATE_READING_PARAM:
 				// reading param
 				if len(req.ContentData) == 0 {
-					cp.ProcessParam(r)
+					obj, err := cp.ProcessParam(r)
+					if err != nil {
+						end := end_request_message
+						end.setAppStatus(4)
+						end.setProtocolStatus(_FCGI_UNKNOWN_ROLE)
+						end.setRequestId(reqId)
+						this.recordChan <- end
+						this.requestLock.Lock()
+						delete(reqMap, reqId)
+						this.requestLock.Unlock()
+						return nil
+					}
+					r.obj = obj
 					r.state = _STATEFUL_REQUEST_STATE_READING_STDIN
 				} else {
 					err := parseNvPair(r, req.ContentData)
