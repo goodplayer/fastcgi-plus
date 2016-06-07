@@ -265,10 +265,151 @@ func (this *statefulRequest) reset() {
 }
 
 func (this *statefulRequest) Set(key, value []byte) {
-	//TODO
+	kh := ((*reflect.SliceHeader)(unsafe.Pointer(&key)))
+	keyString := *(*string)(unsafe.Pointer(&reflect.StringHeader{
+		Data: kh.Data,
+		Len:  kh.Len,
+	}))
+	f, ok := definedParamSetMap[keyString]
+	if ok {
+		f(this, value)
+	} else {
+		this.params[keyString] = value
+	}
 }
 
 func (this *statefulRequest) Get(key []byte) []byte {
-	//TODO
-	return nil
+	kh := ((*reflect.SliceHeader)(unsafe.Pointer(&key)))
+	keyString := *(*string)(unsafe.Pointer(&reflect.StringHeader{
+		Data: kh.Data,
+		Len:  kh.Len,
+	}))
+	f, ok := definedParamGetMap[keyString]
+	if ok {
+		return f(this)
+	} else {
+		return this.params[keyString]
+	}
 }
+
+var (
+	definedParamSetMap = map[string]func(*statefulRequest, []byte){
+		"SCRIPT_FILENAME": func(s *statefulRequest, value []byte) {
+			s.definedParams.SCRIPT_FILENAME = value
+		},
+		"QUERY_STRING": func(s *statefulRequest, value []byte) {
+			s.definedParams.QUERY_STRING = value
+		},
+		"REQUEST_METHOD": func(s *statefulRequest, value []byte) {
+			s.definedParams.REQUEST_METHOD = value
+		},
+		"CONTENT_TYPE": func(s *statefulRequest, value []byte) {
+			s.definedParams.CONTENT_TYPE = value
+		},
+		"CONTENT_LENGTH": func(s *statefulRequest, value []byte) {
+			s.definedParams.CONTENT_LENGTH = value
+		},
+		"SCRIPT_NAME": func(s *statefulRequest, value []byte) {
+			s.definedParams.SCRIPT_NAME = value
+		},
+		"REQUEST_URI": func(s *statefulRequest, value []byte) {
+			s.definedParams.REQUEST_URI = value
+		},
+		"DOCUMENT_URI": func(s *statefulRequest, value []byte) {
+			s.definedParams.DOCUMENT_URI = value
+		},
+		"DOCUMENT_ROOT": func(s *statefulRequest, value []byte) {
+			s.definedParams.DOCUMENT_ROOT = value
+		},
+		"SERVER_PROTOCOL": func(s *statefulRequest, value []byte) {
+			s.definedParams.SERVER_PROTOCOL = value
+		},
+		"REQUEST_SCHEME": func(s *statefulRequest, value []byte) {
+			s.definedParams.REQUEST_SCHEME = value
+		},
+		"HTTPS": func(s *statefulRequest, value []byte) {
+			s.definedParams.HTTPS = value
+		},
+		"GATEWAY_INTERFACE": func(s *statefulRequest, value []byte) {
+			s.definedParams.GATEWAY_INTERFACE = value
+		},
+		"SERVER_SOFTWARE": func(s *statefulRequest, value []byte) {
+			s.definedParams.SERVER_SOFTWARE = value
+		},
+		"REMOTE_ADDR": func(s *statefulRequest, value []byte) {
+			s.definedParams.REMOTE_ADDR = value
+		},
+		"REMOTE_PORT": func(s *statefulRequest, value []byte) {
+			s.definedParams.REMOTE_PORT = value
+		},
+		"SERVER_ADDR": func(s *statefulRequest, value []byte) {
+			s.definedParams.SERVER_ADDR = value
+		},
+		"SERVER_PORT": func(s *statefulRequest, value []byte) {
+			s.definedParams.SERVER_PORT = value
+		},
+		"SERVER_NAME": func(s *statefulRequest, value []byte) {
+			s.definedParams.SERVER_NAME = value
+		},
+	}
+
+	definedParamGetMap = map[string]func(s *statefulRequest) []byte{
+		"SCRIPT_FILENAME": func(s *statefulRequest) []byte {
+			return s.definedParams.SCRIPT_FILENAME
+		},
+		"QUERY_STRING": func(s *statefulRequest) []byte {
+			return s.definedParams.QUERY_STRING
+		},
+		"REQUEST_METHOD": func(s *statefulRequest) []byte {
+			return s.definedParams.REQUEST_METHOD
+		},
+		"CONTENT_TYPE": func(s *statefulRequest) []byte {
+			return s.definedParams.CONTENT_TYPE
+		},
+		"CONTENT_LENGTH": func(s *statefulRequest) []byte {
+			return s.definedParams.CONTENT_LENGTH
+		},
+		"SCRIPT_NAME": func(s *statefulRequest) []byte {
+			return s.definedParams.SCRIPT_NAME
+		},
+		"REQUEST_URI": func(s *statefulRequest) []byte {
+			return s.definedParams.REQUEST_URI
+		},
+		"DOCUMENT_URI": func(s *statefulRequest) []byte {
+			return s.definedParams.DOCUMENT_URI
+		},
+		"DOCUMENT_ROOT": func(s *statefulRequest) []byte {
+			return s.definedParams.DOCUMENT_ROOT
+		},
+		"SERVER_PROTOCOL": func(s *statefulRequest) []byte {
+			return s.definedParams.SERVER_PROTOCOL
+		},
+		"REQUEST_SCHEME": func(s *statefulRequest) []byte {
+			return s.definedParams.REQUEST_SCHEME
+		},
+		"HTTPS": func(s *statefulRequest) []byte {
+			return s.definedParams.HTTPS
+		},
+		"GATEWAY_INTERFACE": func(s *statefulRequest) []byte {
+			return s.definedParams.GATEWAY_INTERFACE
+		},
+		"SERVER_SOFTWARE": func(s *statefulRequest) []byte {
+			return s.definedParams.SERVER_SOFTWARE
+		},
+		"REMOTE_ADDR": func(s *statefulRequest) []byte {
+			return s.definedParams.REMOTE_ADDR
+		},
+		"REMOTE_PORT": func(s *statefulRequest) []byte {
+			return s.definedParams.REMOTE_PORT
+		},
+		"SERVER_ADDR": func(s *statefulRequest) []byte {
+			return s.definedParams.SERVER_ADDR
+		},
+		"SERVER_PORT": func(s *statefulRequest) []byte {
+			return s.definedParams.SERVER_PORT
+		},
+		"SERVER_NAME": func(s *statefulRequest) []byte {
+			return s.definedParams.SERVER_NAME
+		},
+	}
+)
