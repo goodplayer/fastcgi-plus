@@ -21,6 +21,10 @@ func NewHttpProcessor() httpProcessor {
 	return httpProcessor{}
 }
 
+func (httpProcessor) ProcessParam(paramContainer innerapi.ParamContainer) {
+	//TODO
+}
+
 func RequestFromMap(params map[string]string) (*http.Request, error) {
 	r := new(http.Request)
 	r.Method = params["REQUEST_METHOD"]

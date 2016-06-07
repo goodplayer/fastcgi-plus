@@ -146,10 +146,10 @@ func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulReq
 			case _STATEFUL_REQUEST_STATE_READING_PARAM:
 				// reading param
 				if len(req.ContentData) == 0 {
+					cp.ProcessParam(r)
 					r.state = _STATEFUL_REQUEST_STATE_READING_STDIN
 				} else {
-					//TODO
-					pairs, err := parseNvPair(req.ContentData)
+					err := parseNvPair(r, req.ContentData)
 					if err != nil {
 						end := end_request_message
 						end.setAppStatus(4)

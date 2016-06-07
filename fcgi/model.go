@@ -2,7 +2,6 @@ package fcgi
 
 import (
 	"bytes"
-	"container/list"
 	"io"
 	"reflect"
 	"unsafe"
@@ -131,43 +130,46 @@ func (this generalNameValuePair) GetKeyValue() ([]byte, []byte) {
 	return this.NameData, this.ValueData
 }
 
-func parseNvPair(data []byte) ([]innerapi.NvPair, error) {
+func (this generalNameValuePair) GetKeyValueString() (key string, value string) {
+	kh := ((*reflect.SliceHeader)(unsafe.Pointer(&this.NameData)))
+	key = *(*string)(unsafe.Pointer(&reflect.StringHeader{
+		Data: kh.Data,
+		Len:  kh.Len,
+	}))
+	vh := ((*reflect.SliceHeader)(unsafe.Pointer(&this.ValueData)))
+	value = *(*string)(unsafe.Pointer(&reflect.StringHeader{
+		Data: vh.Data,
+		Len:  vh.Len,
+	}))
+	return
+}
+
+func parseNvPair(paramContainer innerapi.ParamContainer, data []byte) error {
 	// now we may regard data as complete set of nvPairs leaving rest data in another 'data'
 	buf := bytes.NewBuffer(data)
-	l := list.New()
 	for {
 		keyLength, eof, err := readFcgiLength(buf, false)
 		if err == nil && eof {
 			// end reading
-			r := make([]innerapi.NvPair, l.Len())
-			i := 0
-			for e := l.Front(); e != nil; e = e.Next() {
-				r[i] = e.Value.(innerapi.NvPair)
-				i++
-			}
-			return r, nil
+			return nil
 		} else if err != nil {
-			return nil, err
+			return err
 		}
 		valueLength, _, err := readFcgiLength(buf, true)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		key := make([]byte, keyLength)
 		_, err = buf.Read(key)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		value := make([]byte, valueLength)
 		_, err = buf.Read(value)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		var pair innerapi.NvPair = generalNameValuePair{
-			NameData:  key,
-			ValueData: value,
-		}
-		l.PushBack(pair)
+		paramContainer.Set(key, value)
 	}
 }
 
@@ -264,4 +266,9 @@ func (this *statefulRequest) reset() {
 
 func (this *statefulRequest) Set(key, value []byte) {
 	//TODO
+}
+
+func (this *statefulRequest) Get(key []byte) []byte {
+	//TODO
+	return nil
 }
