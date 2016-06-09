@@ -27,6 +27,7 @@ func (httpProcessor) ProcessParam(paramContainer innerapi.ParamContainer) (inter
 	return RequestFromMap(paramContainer)
 }
 
+// originally from go src
 func RequestFromMap(params innerapi.ParamContainer) (*http.Request, error) {
 	r := new(http.Request)
 	r.Method = params.GetString("REQUEST_METHOD")
