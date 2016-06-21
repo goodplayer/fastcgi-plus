@@ -23,13 +23,13 @@ func NewFcgiServer(option *FcgiServerOption) *fcgiServer {
 }
 
 func (this *fcgiServer) Serve(l net.Listener, handler http.Handler) error {
-	this.childProcessor = fcgihttp.NewHttpProcessor()
+	this.childProcessor = fcgihttp.NewHttpProcessor(handler)
 	for {
 		conn, err := l.Accept()
 		if err != nil {
 			return err
 		}
-		err = startChildHandleLoop(conn, handler, this)
+		err = startChildHandleLoop(conn, this)
 		if err != nil {
 			return err
 		}

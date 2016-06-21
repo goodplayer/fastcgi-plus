@@ -1,7 +1,11 @@
 package innerapi
 
+import "io"
+
 type ChildProcessor interface {
 	ProcessParam(ParamContainer) (interface{}, error)
+	CreateChildContainer() ChildContainer
+	ServeRequest(req interface{}, body io.ReadCloser)
 }
 
 type NvPair interface {
@@ -14,4 +18,9 @@ type ParamContainer interface {
 	Get([]byte) []byte
 	GetString(string) string
 	GetNonFcgiParam() map[string][]byte
+}
+
+type ChildContainer struct {
+	io.ReadCloser
+	*io.PipeWriter
 }

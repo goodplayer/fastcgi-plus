@@ -3,12 +3,15 @@ package fcgi
 import (
 	"bufio"
 	"io"
+	"io/ioutil"
 	"net"
-	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/goodplayer/fastcgi-plus/fcgi/innerapi"
 )
+
+var emptyBody = ioutil.NopCloser(strings.NewReader(""))
 
 type child struct {
 	conn        net.Conn
@@ -26,7 +29,7 @@ func (this *child) reset() {
 	this.requests = nil
 }
 
-func startChildHandleLoop(conn net.Conn, handler http.Handler, fcgis *fcgiServer) error {
+func startChildHandleLoop(conn net.Conn, fcgis *fcgiServer) error {
 	c := getChild()
 	c.conn = conn
 	c.r = bufio.NewReader(conn)
@@ -159,6 +162,7 @@ func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulReq
 						return nil
 					}
 					r.obj = obj
+					r.ChildContainer = cp.CreateChildContainer()
 					r.state = _STATEFUL_REQUEST_STATE_READING_STDIN
 				} else {
 					err := parseNvPair(r, req.ContentData)
@@ -177,9 +181,27 @@ func (this *child) packetDispatching(req request, reqMap map[uint16]*statefulReq
 			case _STATEFUL_REQUEST_STATE_READING_STDIN:
 				// reading stdin
 				if len(req.ContentData) == 0 {
+					if !r.hasInvoked {
+						r.ChildContainer.ReadCloser = emptyBody
+						r.hasInvoked = true
+						// invoke http hendler
+						go cp.ServeRequest(r.obj, r.ReadCloser)
+					} else {
+						if r.PipeWriter != nil {
+							r.PipeWriter.Close()
+						}
+					}
 					r.state = _STATEFUL_REQUEST_STATE_READING_DONE
 				} else {
-					//TODO
+					if !r.hasInvoked {
+						r.hasInvoked = true
+						reader, writer := io.Pipe()
+						r.PipeWriter = writer
+						r.ReadCloser = reader
+						// invoke http handler
+						go cp.ServeRequest(r.obj, r.ReadCloser)
+					}
+					r.PipeWriter.Write(req.ContentData)
 				}
 			case _STATEFUL_REQUEST_STATE_READING_DATA:
 				// currently not support reading data

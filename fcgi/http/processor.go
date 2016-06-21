@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"unsafe"
+	"io"
 
 	"github.com/goodplayer/fastcgi-plus/fcgi/innerapi"
 )
@@ -17,14 +18,25 @@ import (
 var _ innerapi.ChildProcessor = httpProcessor{}
 
 type httpProcessor struct {
+	http.Handler
 }
 
-func NewHttpProcessor() httpProcessor {
-	return httpProcessor{}
+func NewHttpProcessor(h http.Handler) httpProcessor {
+	return httpProcessor{
+		Handler: h,
+	}
 }
 
 func (httpProcessor) ProcessParam(paramContainer innerapi.ParamContainer) (interface{}, error) {
 	return RequestFromMap(paramContainer)
+}
+
+func (httpProcessor) CreateChildContainer() innerapi.ChildContainer {
+	return innerapi.ChildContainer{}
+}
+
+func (httpProcessor) ServeRequest(req interface{}, body io.ReadCloser) {
+	//TODO
 }
 
 // originally from go src

@@ -234,9 +234,11 @@ const (
 
 type statefulRequest struct {
 	//TODO
-	reqId         uint16
-	state         byte
-	obj           interface{}
+	reqId uint16
+	state byte
+	obj   interface{}
+	innerapi.ChildContainer
+	hasInvoked    bool
 	definedParams struct {
 		SCRIPT_FILENAME   []byte
 		QUERY_STRING      []byte
